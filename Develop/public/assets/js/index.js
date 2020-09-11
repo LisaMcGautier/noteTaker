@@ -1,3 +1,4 @@
+// console.log("This is line 1");
 const $noteTitle = $(".note-title");
 const $noteText = $(".note-textarea");
 const $saveNoteBtn = $(".save-note");
@@ -17,9 +18,11 @@ const getNotes = () => {
 
 // A function for saving a note to the db
 const saveNote = (note) => {
+  console.log(note);
   return $.ajax({
     url: "/api/notes",
-    data: note,
+    data: JSON.stringify(note),
+    contentType: "application/json",
     method: "POST",
   });
 };
@@ -126,6 +129,9 @@ const renderNoteList = (notes) => {
   if (notes.length === 0) {
     noteListItems.push(create$li("No saved Notes", false));
   }
+
+  //notes = JSON.parse(notes);
+  //console.log(notes);
 
   notes.forEach((note) => {
     const $li = create$li(note.title).data(note);
