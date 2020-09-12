@@ -26,6 +26,11 @@ server.use(express.json());
 // Routes
 // ===========================================================
 
+// Ensure that you have at least one HTML page being served at the "/" route.
+server.get("/", function(req, res) {
+    res.json(path.join(__dirname, "public/index.html"));
+  });
+
 // GET `/api/notes` - Should read the `db.json` file and return all saved notes as JSON.
 server.get("/api/notes", (request, response) => {
     fs.readFile("./db/db.json", "utf8", (error, data) => {
