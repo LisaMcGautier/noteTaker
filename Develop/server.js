@@ -1,22 +1,30 @@
+// Dependencies
+// ===========================================================
 const fs = require("fs");
 const express = require("express");
 //const { response } = require("express");
 
 const bodyParser = require("body-parser");
-
 const db = require("./db/db.json");
 
+// Sets up the Express App
+// =============================================================
 const server = express();
+const SERVER_PORT = process.env.PORT || 2020;
 
 const jsonParser = bodyParser.json();
 
 // server.use(express.bodyParser());
 server.use(express.static(__dirname + '/public'));
 
+// Sets up the Express app to handle data parsing
+server.use(express.urlencoded({ extended: true }));
+server.use(express.json());
 
-// console.log(__dirname);
-// response.sendFile(__dirname + )
 
+
+// Routes
+// ===========================================================
 
 // GET `/api/notes` - Should read the `db.json` file and return all saved notes as JSON.
 server.get("/api/notes", (request, response) => {
@@ -26,68 +34,74 @@ server.get("/api/notes", (request, response) => {
 
 });
 
+
 // POST `/api/notes` - Should receive a new note to save on the request body, 
 // add it to the `db.json` file, and then return the new note to the client.
 
-// This means you'll need to find a way to give each note a unique `id` when it's saved. 
-// id = DATE and TIME ??
+// DATE and TIME will give each note a unique `id` when it's saved.
 server.post("/api/notes", jsonParser, (request, response) => {
+
+    // receive a new note to save on the request body
     const note = request.body;
     console.log(note);
+    
+    // READ the current `db.json` file
     fs.readFile("./db/db.json", "utf8", (error, data) => {
         let dbNotes = JSON.parse(data);
 
-        // Let's assign a new id to the new note, before saving it to db.json
+        // Use .getTime() method to assign a new id to the new note
         note.id = (new Date()).getTime();
 
-        // Add the new note to the dbNotes object
+        // ADD the new note to the dbNotes array of objects
         dbNotes.push(note);
 
-        // Show the new future db.json contents
+        // Log updated dbNotes array of objects
         console.log(dbNotes);
 
-        // Save the new db.json contents
+        // SAVE updated db.json contents
         fs.writeFile("./db/db.json", JSON.stringify(dbNotes), function(err) {
             if(err) {
                 return console.log(err);
             }
+            // Log success message
             console.log("The db.json was updated with a new note!");
         }); 
 
-        // Send the new note back to the client
+        // RETURN the new note back to the client.
         // response.send(data);
         response.send(note);
     })
 
 });
 
+
 // DELETE `/api/notes/:id` - Should receive a query parameter containing the id of a note to delete. 
-// This means you'll need to find a way to give each note a unique `id` when it's saved. 
+// This means you'll need to find a way to give each note a unique `id` when it's saved ==> POST method
+// 
 // In order to delete a note, you'll need to read all notes from the `db.json` file, 
 // remove the note with the given `id` property, and then rewrite the notes to the `db.json` file.
 server.delete("/api/notes/:id", (request, response) => {
-    // fs.readFile("./movies.html", "utf8", (error, data) => {
-        //response.send(JSON.stringify(request.params.id));
-    // })
 
+    // read all notes from the `db.json` file, 
     fs.readFile("./db/db.json", "utf8", (error, data) => {
         let dbNotes = JSON.parse(data);
 
-        // Remove the existing note that match the id provided
+        // REMOVE the existing note that matches the id provided
         dbNotes = dbNotes.filter(note => note.id !== parseInt(request.params.id));
 
-        // Show the new future db.json contents
+        // Show resulting db.json contents
         console.log(dbNotes);
 
-        // Save the new db.json contents
+        // REWRITE the notes to the `db.json` file.
         fs.writeFile("./db/db.json", JSON.stringify(dbNotes), function(err) {
             if(err) {
                 return console.log(err);
             }
+            // Log success message
             console.log("The db.json was updated due to a deleted note!");
         }); 
 
-        // Send the new note back to the client
+        // Send updated dbNotes back to the client
         // response.send(data);
         response.send(dbNotes);
     })
@@ -113,12 +127,11 @@ server.get("*", (request, response) => {
 });
 
 
+// Listener
+// ===========================================================
 
-
-
-
-server.listen(3001, () => {
-    console.log("The server is listening on port 3001")
+server.listen(SERVER_PORT, () => {
+    console.log(`The server is listening on port ${SERVER_PORT}`);
 });
 
 
